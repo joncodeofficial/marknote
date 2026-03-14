@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import { useGlobalStates } from '../context/GlobalContext';
 
-const Canvas = () => {
+const Markdown = () => {
   const { markdownContent } = useGlobalStates();
 
   return (
@@ -13,4 +13,4 @@ const Canvas = () => {
   );
 };
 
-export default Canvas;
+export default Markdown;

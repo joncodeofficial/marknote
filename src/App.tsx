@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import Canvas from './components/Canvas';
+import Markdown from './components/Markdown';
 import { useGlobalStates } from './context/GlobalContext';
 import { useMediaQuery } from '@uidotdev/usehooks';
 import CodeEditor from './components/CodeEditor';
@@ -35,7 +35,7 @@ function App() {
             </PanelResizeHandle>
 
             <Panel defaultSize={50} minSize={30} maxSize={70} className='bg-green-50'>
-              <Canvas />
+              <Markdown />
             </Panel>
           </PanelGroup>
         </div>
@@ -53,7 +53,7 @@ function App() {
             </PanelResizeHandle>
 
             <Panel defaultSize={50} minSize={20} maxSize={80} className='bg-green-50'>
-              <Canvas />
+              <Markdown />
             </Panel>
           </PanelGroup>
         </div>
