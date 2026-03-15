@@ -10,5 +10,8 @@
     "lint": "pnpm --filter client lint",
     "format": "pnpm --filter client format"
   },
-  "packageManager": "pnpm@10.8.1"
+  "packageManager": "pnpm@10.8.1",
+  "pnpm": {
+    "onlyBuiltDependencies": ["@swc/core", "esbuild", "sharp", "workerd"]
+  }
 }
