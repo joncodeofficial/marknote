@@ -5,7 +5,7 @@ const Markdown = () => {
   const { markdownContent } = useGlobalStates();
 
   return (
-    <div className='h-full w-full overflow-y-auto bg-white px-8 py-6 text-gray-800'>
+    <div className='h-full w-full overflow-y-auto bg-card text-card-foreground px-8 py-6'>
       <div className='markdown-preview'>
         <ReactMarkdown>{markdownContent}</ReactMarkdown>
       </div>
