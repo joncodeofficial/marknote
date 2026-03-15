@@ -74,7 +74,7 @@ const NotesSidebar = () => {
   const commitRename = (id: number) => {
     if (renameValue.trim()) {
       const note = notes.find((n) => n.id === id);
-      if (note) updateNote.mutate({ id, name: renameValue.trim(), content: note.content ?? '' });
+      if (note) updateNote.mutate({ id, name: renameValue.trim() });
       if (activeNote?.id === id) setActiveNote({ ...activeNote, name: renameValue.trim() });
     }
     setRenamingId(null);

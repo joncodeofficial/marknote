@@ -19,7 +19,7 @@ export const useCreateNote = () => {
 
 export const useUpdateNote = () => {
   const qc = useQueryClient()
-  return useMutation({ mutationFn: ({ id, name, content }: { id: number; name: string; content: string }) => notesService.update(id, name, content), onSuccess: invalidate(qc) })
+  return useMutation({ mutationFn: ({ id, name, content }: { id: number; name: string; content?: string }) => notesService.update(id, name, content), onSuccess: invalidate(qc) })
 }
 
 export const useDeleteNote = () => {

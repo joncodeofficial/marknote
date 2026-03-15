@@ -29,8 +29,8 @@ export const notesService = {
     return data
   },
 
-  update: async (id: number, name: string, content: string): Promise<Note> => {
-    const { data } = await api.put<Note>(`/notes/${id}`, { name, content })
+  update: async (id: number, name: string, content?: string): Promise<Note> => {
+    const { data } = await api.put<Note>(`/notes/${id}`, { name, ...(content !== undefined && { content }) })
     return data
   },
 

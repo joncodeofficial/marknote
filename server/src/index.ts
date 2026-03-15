@@ -76,11 +76,12 @@ app.post('/notes', async (c) => {
 app.put('/notes/:id', async (c) => {
   const db = getDb(c.env)
   const id = c.req.param('id')
-  const { name, content } = await c.req.json<{ name: string; content: string }>()
-  const result = await db.execute({
-    sql: `UPDATE notes SET name = ?, content = ?, updated_at = datetime('now') WHERE id = ? RETURNING *`,
-    args: [name, content, id],
-  })
+  const { name, content } = await c.req.json<{ name: string; content?: string }>()
+  const result = await db.execute(
+    content !== undefined
+      ? { sql: `UPDATE notes SET name = ?, content = ?, updated_at = datetime('now') WHERE id = ? RETURNING *`, args: [name, content, id] }
+      : { sql: `UPDATE notes SET name = ?, updated_at = datetime('now') WHERE id = ? RETURNING *`, args: [name, id] }
+  )
   if (result.rows.length === 0) return c.json({ error: 'Not found' }, 404)
   return c.json(result.rows[0])
 })
