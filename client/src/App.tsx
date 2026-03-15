@@ -8,12 +8,13 @@ import { useMediaQuery } from '@uidotdev/usehooks'
 import CodeEditor from './components/CodeEditor'
 import NotesSidebar from './components/NotesSidebar'
 import { Button } from './components/ui/button'
+import { TabsRoot, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs'
 import { useNote } from './hooks/useNotes'
 
 function App() {
   const { noteId } = useParams()
   const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)')
-  const { setDimensions, setActiveNote, setMarkdownContent } = useGlobalStates()
+  const { setActiveNote, setMarkdownContent } = useGlobalStates()
 
   // carga la nota del param al recargar la página
   const { data: noteFromParam } = useNote(noteId ? Number(noteId) : null)
@@ -24,18 +25,6 @@ function App() {
   }, [noteFromParam, setActiveNote, setMarkdownContent])
   const sidebarRef = useRef<ImperativePanelHandle>(null)
   const [collapsed, setCollapsed] = useState(false)
-
-  const handleLayoutHorizontal = (dimensions: number[]) => {
-    setDimensions([dimensions[1], 0])
-  }
-
-  const handleLayoutVertical = (dimensions: number[]) => {
-    setDimensions([0, dimensions[1]])
-  }
-
-  useEffect(() => {
-    setDimensions(isSmallDevice ? [0, 50] : [50, 0])
-  }, [isSmallDevice, setDimensions])
 
   const toggleSidebar = () => {
     if (collapsed) {
@@ -48,7 +37,7 @@ function App() {
   return (
     <div className='h-screen w-full bg-background'>
       {!isSmallDevice && (
-        <PanelGroup direction='horizontal' className='h-full' onLayout={handleLayoutHorizontal}>
+        <PanelGroup direction='horizontal' className='h-full'>
           {/* Sidebar */}
           <Panel
             ref={sidebarRef}
@@ -87,35 +76,41 @@ function App() {
             </Button>
           )}
 
-          {/* Editor */}
-          <Panel defaultSize={40} minSize={25}>
-            <CodeEditor />
-          </Panel>
-
-          <PanelResizeHandle className='w-px bg-border hover:bg-primary/40 transition-colors cursor-col-resize' />
-
-          {/* Preview */}
-          <Panel defaultSize={40} minSize={25}>
-            <Markdown />
+          {/* Editor + Preview tabs */}
+          <Panel defaultSize={80} minSize={40}>
+            <TabsRoot defaultValue='preview' className='h-full'>
+              <TabsList>
+                <TabsTrigger value='preview'>Preview</TabsTrigger>
+                <TabsTrigger value='editor'>Editor</TabsTrigger>
+              </TabsList>
+              <TabsContent value='editor'>
+                <CodeEditor />
+              </TabsContent>
+              <TabsContent value='preview'>
+                <Markdown />
+              </TabsContent>
+            </TabsRoot>
           </Panel>
         </PanelGroup>
       )}
 
       {isSmallDevice && (
-        <div className='h-full flex flex-col'>
-          <div className='h-12 shrink-0'>
+        <TabsRoot defaultValue='preview' className='h-full'>
+          <TabsList>
+            <TabsTrigger value='notes'>Notes</TabsTrigger>
+            <TabsTrigger value='preview'>Preview</TabsTrigger>
+            <TabsTrigger value='editor'>Editor</TabsTrigger>
+          </TabsList>
+          <TabsContent value='notes'>
             <NotesSidebar />
-          </div>
-          <PanelGroup direction='vertical' className='flex-1' onLayout={handleLayoutVertical}>
-            <Panel defaultSize={50} minSize={20} maxSize={80}>
-              <CodeEditor />
-            </Panel>
-            <PanelResizeHandle className='h-px bg-border hover:bg-primary/40 transition-colors cursor-row-resize' />
-            <Panel defaultSize={50} minSize={20} maxSize={80}>
-              <Markdown />
-            </Panel>
-          </PanelGroup>
-        </div>
+          </TabsContent>
+          <TabsContent value='preview'>
+            <Markdown />
+          </TabsContent>
+          <TabsContent value='editor'>
+            <CodeEditor />
+          </TabsContent>
+        </TabsRoot>
       )}
     </div>
   )
