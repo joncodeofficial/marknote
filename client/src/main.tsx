@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
+import { HashRouter, Routes, Route, Navigate } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <DimensionsProvider>
-        <BrowserRouter>
+        <HashRouter>
           <Routes>
             <Route path='/login' element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
@@ -23,7 +23,7 @@ createRoot(document.getElementById('root')!).render(
             </Route>
             <Route path='*' element={<Navigate to='/' replace />} />
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </DimensionsProvider>
     </QueryClientProvider>
   </React.StrictMode>

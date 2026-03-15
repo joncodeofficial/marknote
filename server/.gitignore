@@ -20,6 +20,10 @@ node_modules/
 .env.production
 .dev.vars
 
+# wrangler config (contiene bindings y secrets locales)
+wrangler.jsonc
+wrangler.toml
+
 # logs
 logs/
 *.log
