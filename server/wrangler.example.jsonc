@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "marknote-server",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-14",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "TURSO_URL": "libsql://your-database.turso.io",
+    "MASTER_PASSWORD_HASH": "your-bcrypt-hash",
+    "JWT_SECRET": "your-jwt-secret"
+  }
+}
