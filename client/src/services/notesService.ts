@@ -37,4 +37,8 @@ export const notesService = {
   delete: async (id: number): Promise<void> => {
     await api.delete(`/notes/${id}`)
   },
+
+  reorder: async (ids: number[]): Promise<void> => {
+    await api.put('/notes/reorder', { ids })
+  },
 }

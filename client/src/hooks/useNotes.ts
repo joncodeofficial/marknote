@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { notesService } from '../services/notesService'
+import { notesService, type Note } from '../services/notesService'
 
 const KEY = ['notes']
 
@@ -25,4 +25,24 @@ export const useUpdateNote = () => {
 export const useDeleteNote = () => {
   const qc = useQueryClient()
   return useMutation({ mutationFn: (id: number) => notesService.delete(id), onSuccess: invalidate(qc) })
+}
+
+export const useReorderNotes = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: number[]) => notesService.reorder(ids),
+    onMutate: async (ids) => {
+      await qc.cancelQueries({ queryKey: KEY })
+      const snapshot = qc.getQueryData<Note[]>(KEY)
+      qc.setQueryData<Note[]>(KEY, (prev) => {
+        if (!prev) return prev
+        const map = new Map(prev.map((n) => [n.id, n]))
+        return ids.flatMap((id) => (map.has(id) ? [map.get(id)!] : []))
+      })
+      return { snapshot }
+    },
+    onError: (_err, _ids, ctx) => {
+      if (ctx?.snapshot) qc.setQueryData(KEY, ctx.snapshot)
+    },
+  })
 }
