@@ -48,8 +48,26 @@ app.use('/notes/*', async (c, next) => {
 // GET /notes — listar todas las notas (sin content)
 app.get('/notes', async (c) => {
   const db = getDb(c.env)
-  const result = await db.execute('SELECT id, name, created_at, updated_at FROM notes ORDER BY updated_at DESC')
+  const result = await db.execute('SELECT id, name, created_at, updated_at FROM notes ORDER BY "order" ASC, updated_at DESC')
   return c.json(result.rows)
+})
+
+// PUT /notes/reorder — actualizar orden de notas
+app.put('/notes/reorder', async (c) => {
+  const db = getDb(c.env)
+  // Migración lazy: añadir columna order si no existe
+  try {
+    await db.execute('ALTER TABLE notes ADD COLUMN "order" INTEGER DEFAULT 0')
+  } catch {
+    // columna ya existe, ignorar
+  }
+  const { ids } = await c.req.json<{ ids: number[] }>()
+  const stmts = ids.map((id, index) => ({
+    sql: 'UPDATE notes SET "order" = ? WHERE id = ?',
+    args: [index, id],
+  }))
+  await db.batch(stmts)
+  return c.json({ success: true })
 })
 
 // GET /notes/:id — nota completa con markdown
