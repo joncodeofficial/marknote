@@ -3,6 +3,7 @@ import React, { use, useCallback, useState } from 'react'
 import { createContext } from 'react'
 import { APP_STORAGE_KEYS } from '@/config'
 import type { Note } from '@/features/notes/types'
+import { defaultMarkdownContent } from '@/features/notes/content/defaultMarkdown'
 
 type AppContextProviderProps = {
   children: React.ReactNode
@@ -23,7 +24,7 @@ type AppContextState = {
 const INITIAL_STATE: AppContextState = {
   dimensions: [50, 50],
   setDimensions: () => {},
-  markdownContent: '# Hello, markNote!\n\nStart writing **markdown** here.',
+  markdownContent: defaultMarkdownContent,
   setMarkdownContent: () => {},
   token: null,
   login: () => {},
@@ -51,7 +52,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
     sessionStorage.removeItem(APP_STORAGE_KEYS.authToken)
     setToken(null)
     setActiveNote(null)
-    setMarkdownContent(INITIAL_STATE.markdownContent)
+    setMarkdownContent(defaultMarkdownContent)
   }, [])
 
   const value = {

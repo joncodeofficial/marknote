@@ -28,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog'
+import { defaultMarkdownContent } from '@/features/notes/content/defaultMarkdown'
 import { Input } from '@/shared/components/ui/input'
 
 interface SortableNoteProps {
@@ -330,7 +331,7 @@ const NotesSidebar = () => {
     if (activeNote?.id === id) {
       setActiveNote(null)
       setSelectedId(null)
-      setMarkdownContent('')
+      setMarkdownContent(defaultMarkdownContent)
     }
   }
 
