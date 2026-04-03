@@ -6,6 +6,7 @@ import { useDropzone } from 'react-dropzone'
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
 import { DragDropProvider } from '@dnd-kit/react'
 import { isSortable, useSortable } from '@dnd-kit/react/sortable'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Check, FilePlus, GripVertical, LogOut, Search, Trash2, Upload, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useGlobalStates } from '@/app/context/AppContext'
@@ -60,28 +61,53 @@ function DeleteNoteAction({
   onRequestDelete,
   onConfirmDelete,
 }: DeleteNoteActionProps) {
-  if (isPending) {
-    return (
-      <Button
-        variant='destructive'
-        size='xs'
-        className='h-5 px-1.5 text-[10px]'
-        onClick={(e) => onConfirmDelete(e, noteId)}
-      >
-        Confirm
-      </Button>
-    )
-  }
-
   return (
-    <Button
-      variant='ghost'
-      size='icon'
-      className='h-5 w-5 text-muted-foreground hover:text-destructive'
-      onClick={(e) => onRequestDelete(e, noteId)}
-    >
-      <Trash2 className='h-3 w-3' />
-    </Button>
+    <motion.div layout className='relative flex h-5 min-w-[1.25rem] items-center justify-end'>
+      <AnimatePresence mode='wait' initial={false}>
+        {isPending ? (
+          <motion.div
+            key='confirm'
+            layout
+            initial={{ opacity: 0, scale: 0.96, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+            transition={{ duration: 0.14, ease: 'easeOut' }}
+          >
+            <Button
+              variant='destructive'
+              size='xs'
+              className='h-5 rounded-md px-1.5 text-[10px]'
+              onClick={(e) => onConfirmDelete(e, noteId)}
+            >
+              Confirm
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key='trash'
+            layout
+            initial={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.96, filter: 'blur(4px)' }}
+            transition={{ duration: 0.14, ease: 'easeOut' }}
+          >
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-5 w-5 text-muted-foreground hover:text-destructive'
+              onClick={(e) => onRequestDelete(e, noteId)}
+            >
+              <motion.span
+                whileTap={{ scale: 0.82, rotate: -12 }}
+                transition={{ duration: 0.12 }}
+              >
+                <Trash2 className='h-3 w-3' />
+              </motion.span>
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
