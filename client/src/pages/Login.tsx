@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Navigate, useNavigate } from 'react-router'
 import { useGlobalStates } from '@/app/context/AppContext'
 import { APP_ROUTES } from '@/config'
 import { authService } from '@/features/auth/services/authService'
@@ -15,11 +15,15 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 
 const LoginPage = () => {
-  const { login } = useGlobalStates()
+  const { login, token } = useGlobalStates()
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  if (token) {
+    return <Navigate to={APP_ROUTES.home} replace />
+  }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -50,6 +54,7 @@ const LoginPage = () => {
               <Input
                 id='password'
                 type='password'
+                autoComplete='off'
                 placeholder='••••••••'
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}

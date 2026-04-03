@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { API_BASE_URL, APP_STORAGE_KEYS } from '@/config'
+import { clearSessionData } from '@/lib/session'
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -15,7 +16,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem(APP_STORAGE_KEYS.authToken)
+      clearSessionData()
       window.dispatchEvent(new Event('mk:logout'))
     }
     return Promise.reject(error)

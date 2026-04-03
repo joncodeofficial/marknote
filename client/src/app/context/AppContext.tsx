@@ -4,6 +4,7 @@ import { createContext } from 'react'
 import { APP_STORAGE_KEYS } from '@/config'
 import type { Note } from '@/features/notes/types'
 import { defaultMarkdownContent } from '@/features/notes/content/defaultMarkdown'
+import { clearSessionData } from '@/lib/session'
 
 type AppContextProviderProps = {
   children: React.ReactNode
@@ -49,7 +50,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   }, [])
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem(APP_STORAGE_KEYS.authToken)
+    clearSessionData()
     setToken(null)
     setActiveNote(null)
     setMarkdownContent(defaultMarkdownContent)
