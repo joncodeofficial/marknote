@@ -5,7 +5,6 @@ import {
   FilePlus,
   Trash2,
   LogOut,
-  Pencil,
   Check,
   X,
   Search,
@@ -37,14 +36,55 @@ interface SortableNoteProps {
   index: number;
   isActive: boolean;
   isRenaming: boolean;
+  isPendingDelete: boolean;
   renameValue: string;
   disabled: boolean;
   onSelect: (id: number) => void;
-  onDelete: (e: React.MouseEvent, id: number) => void;
+  onRequestDelete: (e: React.MouseEvent, id: number) => void;
+  onConfirmDelete: (e: React.MouseEvent, id: number) => void;
+  onResetDelete: (id: number) => void;
   onStartRename: (e: React.MouseEvent, id: number, name: string) => void;
   onCommitRename: (id: number) => void;
   onCancelRename: () => void;
   onRenameChange: (value: string) => void;
+}
+
+interface DeleteNoteActionProps {
+  noteId: number;
+  isPending: boolean;
+  onRequestDelete: (e: React.MouseEvent, id: number) => void;
+  onConfirmDelete: (e: React.MouseEvent, id: number) => void;
+}
+
+function DeleteNoteAction({
+  noteId,
+  isPending,
+  onRequestDelete,
+  onConfirmDelete,
+}: DeleteNoteActionProps) {
+  if (isPending) {
+    return (
+      <Button
+        variant='destructive'
+        size='xs'
+        className='h-5 px-1.5 text-[10px]'
+        onClick={(e) => onConfirmDelete(e, noteId)}
+      >
+        Confirm
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant='ghost'
+      size='icon'
+      className='w-5 h-5 text-muted-foreground hover:text-destructive'
+      onClick={(e) => onRequestDelete(e, noteId)}
+    >
+      <Trash2 className='w-3 h-3' />
+    </Button>
+  );
 }
 
 function SortableNote({
@@ -52,10 +92,13 @@ function SortableNote({
   index,
   isActive,
   isRenaming,
+  isPendingDelete,
   renameValue,
   disabled,
   onSelect,
-  onDelete,
+  onRequestDelete,
+  onConfirmDelete,
+  onResetDelete,
   onStartRename,
   onCommitRename,
   onCancelRename,
@@ -69,6 +112,11 @@ function SortableNote({
       role='button'
       tabIndex={0}
       onClick={() => !isRenaming && onSelect(note.id)}
+      onMouseLeave={() => onResetDelete(note.id)}
+      onContextMenu={(e) => {
+        if (isRenaming) return;
+        onStartRename(e, note.id, note.name);
+      }}
       onKeyDown={(e) => e.key === 'Enter' && !isRenaming && onSelect(note.id)}
       className={`group relative flex items-center gap-1 px-2 py-2.5 rounded-lg cursor-pointer transition-all ${
         isDragging ? 'opacity-40' : ''
@@ -121,22 +169,12 @@ function SortableNote({
           <div className='flex items-center justify-between gap-1'>
             <span className='text-sm font-medium truncate leading-snug'>{note.name}</span>
             <div className='flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0'>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='w-5 h-5 text-muted-foreground hover:text-foreground'
-                onClick={(e) => onStartRename(e, note.id, note.name)}
-              >
-                <Pencil className='w-3 h-3' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='w-5 h-5 text-muted-foreground hover:text-destructive'
-                onClick={(e) => onDelete(e, note.id)}
-              >
-                <Trash2 className='w-3 h-3' />
-              </Button>
+              <DeleteNoteAction
+                noteId={note.id}
+                isPending={isPendingDelete}
+                onRequestDelete={onRequestDelete}
+                onConfirmDelete={onConfirmDelete}
+              />
             </div>
           </div>
           <span className='text-[11px] text-muted-foreground mt-0.5 block'>
@@ -176,6 +214,7 @@ const NotesSidebar = () => {
   // inline rename
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -244,6 +283,7 @@ const NotesSidebar = () => {
   });
 
   const handleSelectNote = (id: number) => {
+    setPendingDeleteId(null);
     setSelectedId(id);
     navigate(`/note/${id}`);
   };
@@ -259,8 +299,14 @@ const NotesSidebar = () => {
     navigate(`/note/${note.id}`);
   };
 
+  const requestDelete = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setPendingDeleteId((current) => (current === id ? null : id));
+  };
+
   const handleDelete = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
+    setPendingDeleteId(null);
     deleteNote.mutate(id);
     if (activeNote?.id === id) {
       setActiveNote(null);
@@ -270,7 +316,9 @@ const NotesSidebar = () => {
   };
 
   const startRename = (e: React.MouseEvent, id: number, currentName: string) => {
+    e.preventDefault();
     e.stopPropagation();
+    setPendingDeleteId(null);
     setRenamingId(id);
     setRenameValue(currentName);
   };
@@ -285,6 +333,10 @@ const NotesSidebar = () => {
   };
 
   const cancelRename = () => setRenamingId(null);
+
+  const resetPendingDelete = (id: number) => {
+    setPendingDeleteId((current) => (current === id ? null : current));
+  };
 
   const handleLogout = () => {
     logout();
@@ -383,10 +435,13 @@ const NotesSidebar = () => {
                 index={index}
                 isActive={activeNote?.id === note.id}
                 isRenaming={renamingId === note.id}
+                isPendingDelete={pendingDeleteId === note.id}
                 renameValue={renameValue}
                 disabled={!!debouncedSearch}
                 onSelect={handleSelectNote}
-                onDelete={handleDelete}
+                onRequestDelete={requestDelete}
+                onConfirmDelete={handleDelete}
+                onResetDelete={resetPendingDelete}
                 onStartRename={startRename}
                 onCommitRename={commitRename}
                 onCancelRename={cancelRename}
