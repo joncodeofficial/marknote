@@ -1,13 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { use, useCallback } from 'react'
-import { createContext, useState } from 'react'
-import type { Note } from '../services/notesService'
+import React, { use, useCallback, useState } from 'react'
+import { createContext } from 'react'
+import { APP_STORAGE_KEYS } from '@/config'
+import type { Note } from '@/features/notes/types'
 
-type GlobalProviderProps = {
+type AppContextProviderProps = {
   children: React.ReactNode
 }
 
-type GlobalProviderState = {
+type AppContextState = {
   dimensions: number[]
   setDimensions: (dimensions: number[]) => void
   markdownContent: string
@@ -19,7 +20,7 @@ type GlobalProviderState = {
   setActiveNote: (note: Note | null) => void
 }
 
-const INITIAL_STATE: GlobalProviderState = {
+const INITIAL_STATE: AppContextState = {
   dimensions: [50, 50],
   setDimensions: () => {},
   markdownContent: '# Hello, markNote!\n\nStart writing **markdown** here.',
@@ -31,21 +32,23 @@ const INITIAL_STATE: GlobalProviderState = {
   setActiveNote: () => {},
 }
 
-const GlobalProviderContext = createContext<GlobalProviderState>(INITIAL_STATE)
+const AppContext = createContext<AppContextState>(INITIAL_STATE)
 
-export function DimensionsProvider({ children }: GlobalProviderProps) {
+export function AppContextProvider({ children }: AppContextProviderProps) {
   const [dimensions, setDimensions] = useState<number[]>(INITIAL_STATE.dimensions)
   const [markdownContent, setMarkdownContent] = useState<string>(INITIAL_STATE.markdownContent)
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem('mk_token'))
+  const [token, setToken] = useState<string | null>(() =>
+    sessionStorage.getItem(APP_STORAGE_KEYS.authToken)
+  )
   const [activeNote, setActiveNote] = useState<Note | null>(null)
 
   const login = useCallback((newToken: string) => {
-    sessionStorage.setItem('mk_token', newToken)
+    sessionStorage.setItem(APP_STORAGE_KEYS.authToken, newToken)
     setToken(newToken)
   }, [])
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem('mk_token')
+    sessionStorage.removeItem(APP_STORAGE_KEYS.authToken)
     setToken(null)
     setActiveNote(null)
     setMarkdownContent(INITIAL_STATE.markdownContent)
@@ -63,13 +66,13 @@ export function DimensionsProvider({ children }: GlobalProviderProps) {
     setActiveNote,
   }
 
-  return <GlobalProviderContext.Provider value={value}>{children}</GlobalProviderContext.Provider>
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
 export const useGlobalStates = () => {
-  const context = use(GlobalProviderContext)
+  const context = use(AppContext)
   if (context === undefined) {
-    throw new Error('useGlobalStates must be used within a GlobalProvider')
+    throw new Error('useGlobalStates must be used within an AppContextProvider')
   }
   return context
 }

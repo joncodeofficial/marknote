@@ -1,11 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
-import { Input } from '../components/ui/input'
-import { Button } from '../components/ui/button'
-import { Label } from '../components/ui/label'
-import { notesService } from '../services/notesService'
-import { useGlobalStates } from '../context/GlobalContext'
+import { useGlobalStates } from '@/app/context/AppContext'
+import { APP_ROUTES } from '@/config'
+import { authService } from '@/features/auth/services/authService'
+import { Button } from '@/shared/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/ui/card'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 
 const LoginPage = () => {
   const { login } = useGlobalStates()
@@ -14,14 +21,14 @@ const LoginPage = () => {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError(false)
     setLoading(true)
     try {
-      const token = await notesService.login(password)
+      const token = await authService.login(password)
       login(token)
-      navigate('/', { replace: true })
+      navigate(APP_ROUTES.home, { replace: true })
     } catch {
       setError(true)
     } finally {
@@ -30,7 +37,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className='h-screen w-full flex items-center justify-center bg-background'>
+    <div className='flex h-screen w-full items-center justify-center bg-background'>
       <Card className='w-full max-w-sm shadow-md'>
         <CardHeader className='text-center'>
           <CardTitle className='text-2xl'>markNote</CardTitle>
@@ -45,12 +52,10 @@ const LoginPage = () => {
                 type='password'
                 placeholder='••••••••'
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 autoFocus
               />
-              {error && (
-                <p className='text-sm text-destructive'>Incorrect password</p>
-              )}
+              {error && <p className='text-sm text-destructive'>Incorrect password</p>}
             </div>
             <Button type='submit' disabled={loading || !password}>
               {loading ? 'Verifying...' : 'Unlock'}

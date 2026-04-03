@@ -1,28 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router'
-import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from 'react-resizable-panels'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
-import Markdown from './components/Markdown'
-import { useGlobalStates } from './context/GlobalContext'
 import { useMediaQuery } from '@uidotdev/usehooks'
-import CodeEditor from './components/CodeEditor'
-import NotesSidebar from './components/NotesSidebar'
-import { Button } from './components/ui/button'
-import { TabsRoot, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs'
-import { useNote } from './hooks/useNotes'
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle,
+  type ImperativePanelHandle,
+} from 'react-resizable-panels'
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { useParams } from 'react-router'
+import { useGlobalStates } from '@/app/context/AppContext'
+import CodeEditor from '@/features/editor/components/CodeEditor'
+import { useNote } from '@/features/notes/hooks/useNotes'
+import NotesSidebar from '@/features/notes/components/NotesSidebar'
+import MarkdownPreview from '@/features/preview/components/MarkdownPreview'
+import { Button } from '@/shared/components/ui/button'
+import {
+  TabsContent,
+  TabsList,
+  TabsRoot,
+  TabsTrigger,
+} from '@/shared/components/ui/tabs'
 
-function App() {
+const WorkspacePage = () => {
   const { noteId } = useParams()
   const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)')
   const { setActiveNote, setMarkdownContent } = useGlobalStates()
-
-  // carga la nota del param al recargar la página
   const { data: noteFromParam } = useNote(noteId ? Number(noteId) : null)
+
   useEffect(() => {
     if (!noteFromParam) return
     setActiveNote(noteFromParam)
     setMarkdownContent(noteFromParam.content ?? '')
   }, [noteFromParam, setActiveNote, setMarkdownContent])
+
   const sidebarRef = useRef<ImperativePanelHandle>(null)
   const [collapsed, setCollapsed] = useState(false)
 
@@ -38,7 +48,6 @@ function App() {
     <div className='h-screen w-full bg-background'>
       {!isSmallDevice && (
         <PanelGroup direction='horizontal' className='h-full'>
-          {/* Sidebar */}
           <Panel
             ref={sidebarRef}
             defaultSize={20}
@@ -52,31 +61,33 @@ function App() {
             <NotesSidebar />
           </Panel>
 
-          <PanelResizeHandle className='relative w-px bg-border hover:bg-primary/40 transition-colors cursor-col-resize group'>
+          <PanelResizeHandle className='group relative w-px cursor-col-resize bg-border transition-colors hover:bg-primary/40'>
             <Button
               variant='secondary'
               size='icon'
               onClick={toggleSidebar}
-              className='absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-5 h-10 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity'
+              className='absolute top-1/2 z-10 h-10 w-5 -translate-x-1/2 -translate-y-1/2 rounded-sm opacity-0 transition-opacity group-hover:opacity-100'
             >
-              {collapsed ? <PanelLeftOpen className='w-3 h-3' /> : <PanelLeftClose className='w-3 h-3' />}
+              {collapsed ? (
+                <PanelLeftOpen className='h-3 w-3' />
+              ) : (
+                <PanelLeftClose className='h-3 w-3' />
+              )}
             </Button>
           </PanelResizeHandle>
 
-          {/* Botón fijo para re-expandir cuando el sidebar está colapsado */}
           {collapsed && (
             <Button
               variant='secondary'
               size='icon'
               onClick={toggleSidebar}
               title='Abrir sidebar'
-              className='fixed left-2 top-1/2 -translate-y-1/2 z-20 w-6 h-10 rounded-sm shadow-md'
+              className='fixed top-1/2 left-2 z-20 h-10 w-6 -translate-y-1/2 rounded-sm shadow-md'
             >
-              <PanelLeftOpen className='w-3 h-3' />
+              <PanelLeftOpen className='h-3 w-3' />
             </Button>
           )}
 
-          {/* Editor + Preview tabs */}
           <Panel defaultSize={80} minSize={40}>
             <TabsRoot defaultValue='preview' className='h-full'>
               <TabsList>
@@ -87,7 +98,7 @@ function App() {
                 <CodeEditor />
               </TabsContent>
               <TabsContent value='preview'>
-                <Markdown />
+                <MarkdownPreview />
               </TabsContent>
             </TabsRoot>
           </Panel>
@@ -105,7 +116,7 @@ function App() {
             <NotesSidebar />
           </TabsContent>
           <TabsContent value='preview'>
-            <Markdown />
+            <MarkdownPreview />
           </TabsContent>
           <TabsContent value='editor'>
             <CodeEditor />
@@ -116,4 +127,4 @@ function App() {
   )
 }
 
-export default App
+export default WorkspacePage

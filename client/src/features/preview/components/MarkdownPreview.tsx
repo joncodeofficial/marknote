@@ -1,0 +1,44 @@
+import { useState } from 'react'
+import { Check, Copy } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import { useGlobalStates } from '@/app/context/AppContext'
+import { Button } from '@/shared/components/ui/button'
+
+const MarkdownPreview = () => {
+  const { markdownContent } = useGlobalStates()
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(markdownContent)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className='relative h-full w-full overflow-y-auto bg-card px-8 py-6 text-card-foreground'>
+      <Button
+        variant='ghost'
+        size='icon'
+        onClick={handleCopy}
+        className='absolute top-3 right-3 h-7 w-7 overflow-hidden text-muted-foreground hover:text-foreground'
+        title='Copy markdown'
+      >
+        <span
+          key={copied ? 'check' : 'copy'}
+          className={
+            copied
+              ? 'animate-in zoom-in-50 duration-200 text-primary'
+              : 'animate-in fade-in duration-150'
+          }
+        >
+          {copied ? <Check className='h-4 w-4' /> : <Copy className='h-4 w-4' />}
+        </span>
+      </Button>
+      <div className='markdown-preview'>
+        <ReactMarkdown>{markdownContent}</ReactMarkdown>
+      </div>
+    </div>
+  )
+}
+
+export default MarkdownPreview

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, Outlet, useNavigate } from 'react-router'
-import { useGlobalStates } from '../context/GlobalContext'
+import { useGlobalStates } from '@/app/context/AppContext'
+import { APP_ROUTES } from '@/config'
 
 const ProtectedRoute = () => {
   const { token, logout } = useGlobalStates()
@@ -9,22 +10,21 @@ const ProtectedRoute = () => {
   useEffect(() => {
     if (!token) return
 
-    // auto-logout cuando el interceptor de axios dispara mk:logout (401)
     const handleForceLogout = () => {
       logout()
-      navigate('/login', { replace: true })
+      navigate(APP_ROUTES.login, { replace: true })
     }
+
     window.addEventListener('mk:logout', handleForceLogout)
 
-    // auto-logout por expiración del JWT
     let timer: ReturnType<typeof setTimeout>
     try {
       const payload = JSON.parse(atob(token.split('.')[1]))
-      const msLeft = payload.exp * 1000 - Date.now()
-      if (msLeft <= 0) {
+      const millisecondsLeft = payload.exp * 1000 - Date.now()
+      if (millisecondsLeft <= 0) {
         handleForceLogout()
       } else {
-        timer = setTimeout(handleForceLogout, msLeft)
+        timer = setTimeout(handleForceLogout, millisecondsLeft)
       }
     } catch {
       handleForceLogout()
@@ -36,7 +36,7 @@ const ProtectedRoute = () => {
     }
   }, [token, logout, navigate])
 
-  return token ? <Outlet /> : <Navigate to='/login' replace />
+  return token ? <Outlet /> : <Navigate to={APP_ROUTES.login} replace />
 }
 
 export default ProtectedRoute
