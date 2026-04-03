@@ -26,6 +26,21 @@ function getDb(env: Bindings) {
   })
 }
 
+const NOTE_SELECT = `
+  id,
+  name,
+  content,
+  strftime('%Y-%m-%dT%H:%M:%fZ', created_at) AS created_at,
+  strftime('%Y-%m-%dT%H:%M:%fZ', updated_at) AS updated_at
+`
+
+const NOTE_LIST_SELECT = `
+  id,
+  name,
+  strftime('%Y-%m-%dT%H:%M:%fZ', created_at) AS created_at,
+  strftime('%Y-%m-%dT%H:%M:%fZ', updated_at) AS updated_at
+`
+
 // POST /auth — verifica la password y devuelve un JWT (expira en 1h)
 app.post('/auth', async (c) => {
   const { password } = await c.req.json<{ password: string }>()
@@ -48,7 +63,9 @@ app.use('/notes/*', async (c, next) => {
 // GET /notes — listar todas las notas (sin content)
 app.get('/notes', async (c) => {
   const db = getDb(c.env)
-  const result = await db.execute('SELECT id, name, created_at, updated_at FROM notes ORDER BY "order" ASC, updated_at DESC')
+  const result = await db.execute(
+    `SELECT ${NOTE_LIST_SELECT} FROM notes ORDER BY "order" ASC, updated_at DESC`
+  )
   return c.json(result.rows)
 })
 
@@ -74,7 +91,10 @@ app.put('/notes/reorder', async (c) => {
 app.get('/notes/:id', async (c) => {
   const db = getDb(c.env)
   const id = c.req.param('id')
-  const result = await db.execute({ sql: 'SELECT * FROM notes WHERE id = ?', args: [id] })
+  const result = await db.execute({
+    sql: `SELECT ${NOTE_SELECT} FROM notes WHERE id = ?`,
+    args: [id],
+  })
   if (result.rows.length === 0) return c.json({ error: 'Not found' }, 404)
   return c.json(result.rows[0])
 })
@@ -84,7 +104,7 @@ app.post('/notes', async (c) => {
   const db = getDb(c.env)
   const { name, content } = await c.req.json<{ name: string; content: string }>()
   const result = await db.execute({
-    sql: 'INSERT INTO notes (name, content) VALUES (?, ?) RETURNING *',
+    sql: `INSERT INTO notes (name, content) VALUES (?, ?) RETURNING ${NOTE_SELECT}`,
     args: [name, content],
   })
   return c.json(result.rows[0], 201)
@@ -97,8 +117,14 @@ app.put('/notes/:id', async (c) => {
   const { name, content } = await c.req.json<{ name: string; content?: string }>()
   const result = await db.execute(
     content !== undefined
-      ? { sql: `UPDATE notes SET name = ?, content = ?, updated_at = datetime('now') WHERE id = ? RETURNING *`, args: [name, content, id] }
-      : { sql: `UPDATE notes SET name = ?, updated_at = datetime('now') WHERE id = ? RETURNING *`, args: [name, id] }
+      ? {
+          sql: `UPDATE notes SET name = ?, content = ?, updated_at = datetime('now') WHERE id = ? RETURNING ${NOTE_SELECT}`,
+          args: [name, content, id],
+        }
+      : {
+          sql: `UPDATE notes SET name = ?, updated_at = datetime('now') WHERE id = ? RETURNING ${NOTE_SELECT}`,
+          args: [name, id],
+        }
   )
   if (result.rows.length === 0) return c.json({ error: 'Not found' }, 404)
   return c.json(result.rows[0])
