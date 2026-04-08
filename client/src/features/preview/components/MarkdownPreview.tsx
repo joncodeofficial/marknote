@@ -1,5 +1,8 @@
 import { Maximize2, Minimize2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useGlobalStates } from '@/app/context/AppContext'
 import { Button } from '@/shared/components/ui/button'
 import CopyMarkdownButton from '@/shared/components/CopyMarkdownButton'
@@ -26,7 +29,30 @@ const MarkdownPreview = () => {
 
   const content = (
     <div className='markdown-preview'>
-      <ReactMarkdown>{markdownContent}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({ className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className ?? '')
+            const isInline = !match
+            return isInline ? (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            ) : (
+              <SyntaxHighlighter
+                style={oneDark}
+                language={match[1]}
+                PreTag='div'
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            )
+          },
+        }}
+      >
+        {markdownContent}
+      </ReactMarkdown>
     </div>
   )
 
