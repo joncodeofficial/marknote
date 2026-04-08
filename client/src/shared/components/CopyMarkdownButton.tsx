@@ -49,7 +49,6 @@ const CopyMarkdownButton = ({ className }: CopyMarkdownButtonProps) => {
       <AnimatePresence mode='wait' initial={false}>
         <motion.span
           key={copied ? 'check' : 'copy'}
-          initial={{ opacity: 0, scale: 0.7, y: 3, rotate: copied ? -8 : 8 }}
           animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
           exit={{ opacity: 0, scale: 0.7, y: -3, rotate: copied ? 8 : -8 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
