@@ -14,6 +14,7 @@ import { useNote } from '@/features/notes/hooks/useNotes'
 import NotesSidebar from '@/features/notes/components/NotesSidebar'
 import MarkdownPreview from '@/features/preview/components/MarkdownPreview'
 import { Button } from '@/shared/components/ui/button'
+import CopyMarkdownButton from '@/shared/components/CopyMarkdownButton'
 import {
   TabsContent,
   TabsList,
@@ -89,11 +90,12 @@ const WorkspacePage = () => {
           )}
 
           <Panel defaultSize={80} minSize={40}>
-            <TabsRoot defaultValue='preview' className='h-full'>
+            <TabsRoot defaultValue='preview' className='relative h-full'>
               <TabsList>
                 <TabsTrigger value='preview'>Preview</TabsTrigger>
                 <TabsTrigger value='editor'>Editor</TabsTrigger>
               </TabsList>
+              <CopyMarkdownButton className='absolute top-10 right-5' />
               <TabsContent value='editor'>
                 <CodeEditor />
               </TabsContent>
@@ -106,12 +108,13 @@ const WorkspacePage = () => {
       )}
 
       {isSmallDevice && (
-        <TabsRoot defaultValue='preview' className='h-full'>
+        <TabsRoot defaultValue='preview' className='relative h-full'>
           <TabsList>
             <TabsTrigger value='notes'>Notes</TabsTrigger>
             <TabsTrigger value='preview'>Preview</TabsTrigger>
             <TabsTrigger value='editor'>Editor</TabsTrigger>
           </TabsList>
+          <CopyMarkdownButton className='absolute top-10 right-5' />
           <TabsContent value='notes'>
             <NotesSidebar />
           </TabsContent>

@@ -12,7 +12,7 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof Tabs.List
     <Tabs.List
       data-slot='tabs-list'
       className={cn(
-        'inline-flex h-9 items-center justify-start rounded-none border-b border-border bg-background px-2 gap-1',
+        'flex h-9 items-center justify-start rounded-none border-b border-border bg-background px-2 gap-1',
         className,
       )}
       {...props}

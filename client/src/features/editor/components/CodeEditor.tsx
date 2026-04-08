@@ -4,7 +4,6 @@ import { useDebounce } from '@uidotdev/usehooks'
 import { type editor } from 'monaco-editor'
 import { useGlobalStates } from '@/app/context/AppContext'
 import { useUpdateNote } from '@/features/notes/hooks/useNotes'
-import CopyMarkdownButton from '@/shared/components/CopyMarkdownButton'
 
 function resolveCssColor(variableName: string): string {
   const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim()
@@ -84,7 +83,6 @@ const CodeEditor = () => {
 
   return (
     <div className='relative h-full'>
-      <CopyMarkdownButton className='absolute top-1 right-1' />
       <Editor
         defaultLanguage='markdown'
         value={markdownContent}
