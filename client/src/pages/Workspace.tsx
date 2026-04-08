@@ -14,7 +14,6 @@ import { useNote } from '@/features/notes/hooks/useNotes'
 import NotesSidebar from '@/features/notes/components/NotesSidebar'
 import MarkdownPreview from '@/features/preview/components/MarkdownPreview'
 import { Button } from '@/shared/components/ui/button'
-import CopyMarkdownButton from '@/shared/components/CopyMarkdownButton'
 import {
   TabsContent,
   TabsList,
@@ -95,7 +94,6 @@ const WorkspacePage = () => {
                 <TabsTrigger value='preview'>Preview</TabsTrigger>
                 <TabsTrigger value='editor'>Editor</TabsTrigger>
               </TabsList>
-              <CopyMarkdownButton className='absolute top-10 right-5' />
               <TabsContent value='editor'>
                 <CodeEditor />
               </TabsContent>
@@ -114,7 +112,6 @@ const WorkspacePage = () => {
             <TabsTrigger value='preview'>Preview</TabsTrigger>
             <TabsTrigger value='editor'>Editor</TabsTrigger>
           </TabsList>
-          <CopyMarkdownButton className='absolute top-10 right-5' />
           <TabsContent value='notes'>
             <NotesSidebar />
           </TabsContent>
