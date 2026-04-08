@@ -40,8 +40,9 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof Tabs.T
 function TabsContent({ className, ...props }: React.ComponentProps<typeof Tabs.Content>) {
   return (
     <Tabs.Content
+      forceMount
       data-slot='tabs-content'
-      className={cn('h-[calc(100%-36px)] overflow-hidden', className)}
+      className={cn('h-[calc(100%-36px)] overflow-hidden data-[state=inactive]:hidden', className)}
       {...props}
     />
   )
