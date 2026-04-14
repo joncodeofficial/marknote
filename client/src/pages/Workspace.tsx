@@ -26,11 +26,15 @@ const WorkspacePage = () => {
   const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)')
   const { setActiveNote, setMarkdownContent } = useGlobalStates()
   const { data: noteFromParam } = useNote(noteId ? Number(noteId) : null)
+  const loadedNoteId = useRef<number | null>(null)
 
   useEffect(() => {
     if (!noteFromParam) return
+    if (noteFromParam.id !== loadedNoteId.current) {
+      loadedNoteId.current = noteFromParam.id
+      setMarkdownContent(noteFromParam.content ?? '')
+    }
     setActiveNote(noteFromParam)
-    setMarkdownContent(noteFromParam.content ?? '')
   }, [noteFromParam, setActiveNote, setMarkdownContent])
 
   const sidebarRef = useRef<ImperativePanelHandle>(null)

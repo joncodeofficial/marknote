@@ -31,7 +31,31 @@ export const useUpdateNote = () => {
   return useMutation({
     mutationFn: ({ id, name, content }: { id: number; name: string; content?: string }) =>
       notesService.update(id, name, content),
-    onSuccess: invalidateNotes(queryClient),
+    onMutate: async ({ id, name, content }) => {
+      await queryClient.cancelQueries({ queryKey: NOTES_QUERY_KEY })
+      await queryClient.cancelQueries({ queryKey: [...NOTES_QUERY_KEY, id] })
+
+      const listSnapshot = queryClient.getQueryData<Note[]>(NOTES_QUERY_KEY)
+      const noteSnapshot = queryClient.getQueryData<Note>([...NOTES_QUERY_KEY, id])
+
+      queryClient.setQueryData<Note[]>(NOTES_QUERY_KEY, (prev) =>
+        prev?.map((note) =>
+          note.id === id
+            ? { ...note, name, ...(content !== undefined && { content }) }
+            : note
+        )
+      )
+      queryClient.setQueryData<Note>([...NOTES_QUERY_KEY, id], (prev) =>
+        prev ? { ...prev, name, ...(content !== undefined && { content }) } : prev
+      )
+
+      return { listSnapshot, noteSnapshot }
+    },
+    onError: (_error, { id }, context) => {
+      if (context?.listSnapshot) queryClient.setQueryData(NOTES_QUERY_KEY, context.listSnapshot)
+      if (context?.noteSnapshot) queryClient.setQueryData([...NOTES_QUERY_KEY, id], context.noteSnapshot)
+    },
+    onSettled: invalidateNotes(queryClient),
   })
 }
 

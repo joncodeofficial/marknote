@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Editor, { type Monaco } from '@monaco-editor/react'
 import { useDebounce } from '@uidotdev/usehooks'
 import { type editor } from 'monaco-editor'
@@ -19,15 +19,27 @@ function resolveCssColor(variableName: string): string {
 const CodeEditor = () => {
   const { markdownContent, setMarkdownContent, activeNote } = useGlobalStates()
   const updateNote = useUpdateNote()
-  const debouncedContent = useDebounce(markdownContent, 1000)
+  const debouncedContent = useDebounce(markdownContent, 300)
+  const lastSavedContent = useRef<string | null>(null)
+
+  useEffect(() => {
+    lastSavedContent.current = null // reset on note switch
+  }, [activeNote?.id])
 
   useEffect(() => {
     if (!activeNote) return
-    if (debouncedContent === activeNote.content) return
+    const baseline = lastSavedContent.current ?? activeNote.content
+    if (debouncedContent === baseline) return
+    lastSavedContent.current = debouncedContent
     updateNote.mutate({ id: activeNote.id, name: activeNote.name, content: debouncedContent })
   }, [debouncedContent]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEditorMount = (_editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true, noSyntaxValidation: true })
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true, noSyntaxValidation: true })
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true })
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({ noLib: true, allowNonTsExtensions: true })
+
     const background = resolveCssColor('--background')
     const foreground = resolveCssColor('--foreground')
     const muted = resolveCssColor('--muted')
@@ -84,6 +96,7 @@ const CodeEditor = () => {
   return (
     <div className='relative h-full'>
       <Editor
+        key={activeNote?.id ?? 'default'}
         defaultLanguage='markdown'
         value={markdownContent}
         onChange={(value) => setMarkdownContent(value ?? '')}
@@ -97,6 +110,11 @@ const CodeEditor = () => {
           renderLineHighlight: 'line',
           fontFamily: 'var(--font-mono)',
           padding: { top: 16, bottom: 16 },
+          quickSuggestions: false,
+          suggestOnTriggerCharacters: false,
+          acceptSuggestionOnEnter: 'off',
+          tabCompletion: 'off',
+          wordBasedSuggestions: 'off',
         }}
       />
     </div>

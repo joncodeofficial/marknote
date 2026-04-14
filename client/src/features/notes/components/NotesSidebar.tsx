@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router'
-import { useDebounce } from '@uidotdev/usehooks'
-import { useDropzone } from 'react-dropzone'
-import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers'
-import { DragDropProvider } from '@dnd-kit/react'
-import { isSortable, useSortable } from '@dnd-kit/react/sortable'
-import { Check, FilePlus, GripVertical, LogOut, Search, Trash2, Upload, X } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
-import { useGlobalStates } from '@/app/context/AppContext'
-import { APP_ROUTES } from '@/config'
-import type { Note } from '@/features/notes/types'
+import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router';
+import { useDebounce } from '@uidotdev/usehooks';
+import { useDropzone } from 'react-dropzone';
+import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
+import { DragDropProvider } from '@dnd-kit/react';
+import { isSortable, useSortable } from '@dnd-kit/react/sortable';
+import { Check, FilePlus, GripVertical, LogOut, Search, Trash2, Upload, X } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useGlobalStates } from '@/app/context/AppContext';
+import { APP_ROUTES } from '@/config';
+import type { Note } from '@/features/notes/types';
 import {
   useCreateNote,
   useDeleteNote,
@@ -18,41 +18,41 @@ import {
   useNotesList,
   useReorderNotes,
   useUpdateNote,
-} from '@/features/notes/hooks/useNotes'
-import { Button } from '@/shared/components/ui/button'
+} from '@/features/notes/hooks/useNotes';
+import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/shared/components/ui/dialog'
-import { defaultMarkdownContent } from '@/features/notes/content/defaultMarkdown'
-import { Input } from '@/shared/components/ui/input'
+} from '@/shared/components/ui/dialog';
+import { defaultMarkdownContent } from '@/features/notes/content/defaultMarkdown';
+import { Input } from '@/shared/components/ui/input';
 
 interface SortableNoteProps {
-  note: Note
-  index: number
-  isActive: boolean
-  isRenaming: boolean
-  isPendingDelete: boolean
-  renameValue: string
-  disabled: boolean
-  onSelect: (id: number) => void
-  onRequestDelete: (e: React.MouseEvent, id: number) => void
-  onConfirmDelete: (e: React.MouseEvent, id: number) => void
-  onResetDelete: (id: number) => void
-  onStartRename: (e: React.MouseEvent, id: number, name: string) => void
-  onCommitRename: (id: number) => void
-  onCancelRename: () => void
-  onRenameChange: (value: string) => void
+  note: Note;
+  index: number;
+  isActive: boolean;
+  isRenaming: boolean;
+  isPendingDelete: boolean;
+  renameValue: string;
+  disabled: boolean;
+  onSelect: (id: number) => void;
+  onRequestDelete: (e: React.MouseEvent, id: number) => void;
+  onConfirmDelete: (e: React.MouseEvent, id: number) => void;
+  onResetDelete: (id: number) => void;
+  onStartRename: (e: React.MouseEvent, id: number, name: string) => void;
+  onCommitRename: (id: number) => void;
+  onCancelRename: () => void;
+  onRenameChange: (value: string) => void;
 }
 
 interface DeleteNoteActionProps {
-  noteId: number
-  isPending: boolean
-  onRequestDelete: (e: React.MouseEvent, id: number) => void
-  onConfirmDelete: (e: React.MouseEvent, id: number) => void
+  noteId: number;
+  isPending: boolean;
+  onRequestDelete: (e: React.MouseEvent, id: number) => void;
+  onConfirmDelete: (e: React.MouseEvent, id: number) => void;
 }
 
 function DeleteNoteAction({
@@ -83,7 +83,7 @@ function DeleteNoteAction({
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 function SortableNote({
@@ -103,7 +103,7 @@ function SortableNote({
   onCancelRename,
   onRenameChange,
 }: SortableNoteProps) {
-  const { ref, handleRef, isDragging } = useSortable({ id: note.id, index, disabled })
+  const { ref, handleRef, isDragging } = useSortable({ id: note.id, index, disabled });
 
   return (
     <div
@@ -113,8 +113,8 @@ function SortableNote({
       onClick={() => !isRenaming && onSelect(note.id)}
       onMouseLeave={() => onResetDelete(note.id)}
       onContextMenu={(e) => {
-        if (isRenaming) return
-        onStartRename(e, note.id, note.name)
+        if (isRenaming) return;
+        onStartRename(e, note.id, note.name);
       }}
       onKeyDown={(e) => e.key === 'Enter' && !isRenaming && onSelect(note.id)}
       className={`group relative flex cursor-pointer items-center gap-1 rounded-lg px-2 py-2.5 transition-all ${
@@ -140,8 +140,8 @@ function SortableNote({
             value={renameValue}
             onChange={(e) => onRenameChange(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onCommitRename(note.id)
-              if (e.key === 'Escape') onCancelRename()
+              if (e.key === 'Enter') onCommitRename(note.id);
+              if (e.key === 'Escape') onCancelRename();
             }}
             className='h-6 bg-background px-1.5 py-0 text-xs'
           />
@@ -181,84 +181,89 @@ function SortableNote({
         </>
       )}
     </div>
-  )
+  );
 }
 
 const NotesSidebar = () => {
-  const { logout, setMarkdownContent, activeNote, setActiveNote } = useGlobalStates()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { logout, setMarkdownContent, activeNote, setActiveNote } = useGlobalStates();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const { data: notes = [], isLoading } = useNotesList()
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const { data: fullNote } = useNote(selectedId)
+  const { data: notes = [], isLoading } = useNotesList();
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const { data: fullNote } = useNote(selectedId);
 
-  const createNote = useCreateNote()
-  const updateNote = useUpdateNote()
-  const deleteNote = useDeleteNote()
-  const reorderNotes = useReorderNotes()
+  const createNote = useCreateNote();
+  const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
+  const reorderNotes = useReorderNotes();
 
-  const [search, setSearch] = useState('')
-  const debouncedSearch = useDebounce(search, 300)
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
 
-  const [newNoteDialog, setNewNoteDialog] = useState(false)
-  const [newNoteName, setNewNoteName] = useState('')
-  const [importedContent, setImportedContent] = useState('')
-  const [importedFileName, setImportedFileName] = useState<string | null>(null)
-  const [importError, setImportError] = useState('')
+  const [newNoteDialog, setNewNoteDialog] = useState(false);
+  const [newNoteName, setNewNoteName] = useState('');
+  const [importedContent, setImportedContent] = useState('');
+  const [importedFileName, setImportedFileName] = useState<string | null>(null);
+  const [importError, setImportError] = useState('');
 
-  const [renamingId, setRenamingId] = useState<number | null>(null)
-  const [renameValue, setRenameValue] = useState('')
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const loadedNoteId = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!fullNote) return
-    setActiveNote(fullNote)
-    setMarkdownContent(fullNote.content ?? '')
-  }, [fullNote, setActiveNote, setMarkdownContent])
+    if (!fullNote) return;
+    if (fullNote.id !== loadedNoteId.current) {
+      loadedNoteId.current = fullNote.id;
+      setMarkdownContent(fullNote.content ?? '');
+    }
+    setActiveNote(fullNote);
+  }, [fullNote, setActiveNote, setMarkdownContent]);
 
   const resetNewNoteDialog = () => {
-    setNewNoteDialog(false)
-    setNewNoteName('')
-    setImportedContent('')
-    setImportedFileName(null)
-    setImportError('')
-  }
+    setNewNoteDialog(false);
+    setNewNoteName('');
+    setImportedContent('');
+    setImportedFileName(null);
+    setImportError('');
+  };
 
-  const getNoteNameFromFile = (fileName: string) => fileName.replace(/\.(md|markdown)$/i, '').trim()
+  const getNoteNameFromFile = (fileName: string) =>
+    fileName.replace(/\.(md|markdown)$/i, '').trim();
 
   const readMarkdownFile = async (file: File) => {
     const isMarkdownFile =
       file.name.toLowerCase().endsWith('.md') ||
       file.name.toLowerCase().endsWith('.markdown') ||
       file.type === 'text/markdown' ||
-      file.type === 'text/plain'
+      file.type === 'text/plain';
 
     if (!isMarkdownFile) {
-      setImportError('Only Markdown files are supported.')
-      return
+      setImportError('Only Markdown files are supported.');
+      return;
     }
 
-    const content = await file.text()
-    const suggestedName = getNoteNameFromFile(file.name)
+    const content = await file.text();
+    const suggestedName = getNoteNameFromFile(file.name);
 
-    setImportedContent(content)
-    setImportedFileName(file.name)
-    setImportError('')
+    setImportedContent(content);
+    setImportedFileName(file.name);
+    setImportError('');
     if (!newNoteName.trim()) {
-      setNewNoteName(suggestedName || 'Imported note')
+      setNewNoteName(suggestedName || 'Imported note');
     }
-  }
+  };
 
   const handleFileSelection = async (file?: File | null) => {
-    if (!file) return
+    if (!file) return;
 
     try {
-      await readMarkdownFile(file)
+      await readMarkdownFile(file);
     } catch {
-      setImportError('The selected file could not be read.')
+      setImportError('The selected file could not be read.');
     }
-  }
+  };
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: {
@@ -269,84 +274,87 @@ const NotesSidebar = () => {
     multiple: false,
     noClick: true,
     onDropAccepted: (files) => {
-      void handleFileSelection(files[0])
+      void handleFileSelection(files[0]);
     },
     onDropRejected: () => {
-      setImportError('Only one Markdown file is supported.')
+      setImportError('Only one Markdown file is supported.');
     },
-  })
+  });
 
   const handleSelectNote = (id: number) => {
-    setPendingDeleteId(null)
-    setSelectedId(id)
-    navigate(APP_ROUTES.note(id))
-  }
+    setPendingDeleteId(null);
+    setSelectedId(id);
+    navigate(APP_ROUTES.note(id));
+  };
 
   const handleNewNote = async () => {
-    if (!newNoteName.trim()) return
+    if (!newNoteName.trim()) return;
     const note = await createNote.mutateAsync({
       name: newNoteName.trim(),
       content: importedContent,
-    })
-    resetNewNoteDialog()
-    setSelectedId(note.id)
-    navigate(APP_ROUTES.note(note.id))
-  }
+    });
+    resetNewNoteDialog();
+    setSelectedId(note.id);
+    navigate(APP_ROUTES.note(note.id));
+  };
 
   const requestDelete = (e: React.MouseEvent, id: number) => {
-    e.stopPropagation()
-    setPendingDeleteId((current) => (current === id ? null : id))
-  }
+    e.stopPropagation();
+    setPendingDeleteId((current) => (current === id ? null : id));
+  };
 
   const handleDelete = (e: React.MouseEvent, id: number) => {
-    e.stopPropagation()
-    setPendingDeleteId(null)
-    deleteNote.mutate(id)
+    e.stopPropagation();
+    setPendingDeleteId(null);
+    deleteNote.mutate(id);
     if (activeNote?.id === id) {
-      setActiveNote(null)
-      setSelectedId(null)
-      setMarkdownContent(defaultMarkdownContent)
+      setActiveNote(null);
+      setSelectedId(null);
+      setMarkdownContent(defaultMarkdownContent);
     }
-  }
+  };
 
   const startRename = (e: React.MouseEvent, id: number, currentName: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setPendingDeleteId(null)
-    setRenamingId(id)
-    setRenameValue(currentName)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setPendingDeleteId(null);
+    setRenamingId(id);
+    setRenameValue(currentName);
+  };
 
   const commitRename = (id: number) => {
     if (renameValue.trim()) {
-      const note = notes.find((entry) => entry.id === id)
-      if (note) updateNote.mutate({ id, name: renameValue.trim() })
-      if (activeNote?.id === id) setActiveNote({ ...activeNote, name: renameValue.trim() })
+      const note = notes.find((entry) => entry.id === id);
+      if (note) updateNote.mutate({ id, name: renameValue.trim() });
+      if (activeNote?.id === id) setActiveNote({ ...activeNote, name: renameValue.trim() });
     }
-    setRenamingId(null)
-  }
+    setRenamingId(null);
+  };
 
-  const cancelRename = () => setRenamingId(null)
+  const cancelRename = () => setRenamingId(null);
 
   const resetPendingDelete = (id: number) => {
-    setPendingDeleteId((current) => (current === id ? null : current))
-  }
+    setPendingDeleteId((current) => (current === id ? null : current));
+  };
 
   const handleLogout = () => {
-    logout()
-    navigate(APP_ROUTES.login, { replace: true })
-  }
+    logout();
+    navigate(APP_ROUTES.login, { replace: true });
+  };
 
   const filteredNotes = debouncedSearch
     ? notes.filter((note) => note.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    : notes
+    : notes;
 
   return (
     <div className='flex h-full flex-col bg-sidebar'>
       <div className='flex items-center justify-between px-4 pt-5 pb-4'>
-        <span className='text-sm font-semibold tracking-widest text-muted-foreground uppercase'>
-          markNote
-        </span>
+        <div className='flex items-center gap-2'>
+          <img src='/isotipo.png' alt='markNote' className='h-6 w-6' />
+          <span className='text-sm font-semibold tracking-widest text-muted-foreground uppercase'>
+            markNote
+          </span>
+        </div>
         <Button
           variant='ghost'
           size='icon'
@@ -386,21 +394,21 @@ const NotesSidebar = () => {
       <DragDropProvider
         modifiers={[RestrictToVerticalAxis]}
         onDragOver={(event) => {
-          const { source, target } = event.operation
-          if (!source || !target || !isSortable(source) || !isSortable(target)) return
-          if (source.id === target.id) return
+          const { source, target } = event.operation;
+          if (!source || !target || !isSortable(source) || !isSortable(target)) return;
+          if (source.id === target.id) return;
           queryClient.setQueryData<Note[]>(['notes'], (previousNotes) => {
-            if (!previousNotes) return previousNotes
-            const items = [...previousNotes]
-            const [moved] = items.splice(source.index, 1)
-            items.splice(target.index, 0, moved)
-            return items
-          })
+            if (!previousNotes) return previousNotes;
+            const items = [...previousNotes];
+            const [moved] = items.splice(source.index, 1);
+            items.splice(target.index, 0, moved);
+            return items;
+          });
         }}
         onDragEnd={(event) => {
-          if (event.canceled) return
-          const currentNotes = queryClient.getQueryData<Note[]>(['notes'])
-          if (currentNotes) reorderNotes.mutate(currentNotes.map((note) => note.id))
+          if (event.canceled) return;
+          const currentNotes = queryClient.getQueryData<Note[]>(['notes']);
+          if (currentNotes) reorderNotes.mutate(currentNotes.map((note) => note.id));
         }}
       >
         <div className='flex-1 overflow-y-auto'>
@@ -445,10 +453,10 @@ const NotesSidebar = () => {
         open={newNoteDialog}
         onOpenChange={(open) => {
           if (!open) {
-            resetNewNoteDialog()
-            return
+            resetNewNoteDialog();
+            return;
           }
-          setNewNoteDialog(true)
+          setNewNoteDialog(true);
         }}
       >
         <DialogContent className='max-w-sm'>
@@ -487,7 +495,8 @@ const NotesSidebar = () => {
 
             {importedFileName && (
               <p className='text-xs text-muted-foreground'>
-                Imported file: <span className='font-medium text-foreground'>{importedFileName}</span>
+                Imported file:{' '}
+                <span className='font-medium text-foreground'>{importedFileName}</span>
               </p>
             )}
 
@@ -497,14 +506,17 @@ const NotesSidebar = () => {
             <Button variant='outline' onClick={resetNewNoteDialog}>
               Cancel
             </Button>
-            <Button onClick={() => void handleNewNote()} disabled={!newNoteName.trim() || createNote.isPending}>
+            <Button
+              onClick={() => void handleNewNote()}
+              disabled={!newNoteName.trim() || createNote.isPending}
+            >
               {importedFileName ? 'Import note' : 'Create'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default NotesSidebar
+export default NotesSidebar;
