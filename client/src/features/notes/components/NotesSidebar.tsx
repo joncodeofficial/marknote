@@ -116,7 +116,7 @@ const NotesSidebar = () => {
     <div className='flex h-full flex-col bg-sidebar'>
       <div className='flex items-center justify-between px-4 pt-5 pb-4'>
         <div className='flex items-center gap-2'>
-          <img src='/isotipo.png' alt='markNote' className='h-6 w-6' />
+          <img src={`${import.meta.env.BASE_URL}isotipo.png`} alt='markNote' className='h-6 w-6' />
           <span className='text-sm font-semibold tracking-widest text-muted-foreground uppercase'>
             markNote
           </span>
