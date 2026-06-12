@@ -25,7 +25,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../shared/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
 
   "include": ["src"]
