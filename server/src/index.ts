@@ -104,7 +104,7 @@ app.post('/notes', async (c) => {
   const db = getDb(c.env)
   const { name, content } = await c.req.json<{ name: string; content: string }>()
   const result = await db.execute({
-    sql: `INSERT INTO notes (name, content) VALUES (?, ?) RETURNING ${NOTE_SELECT}`,
+    sql: `INSERT INTO notes (name, content, created_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now')) RETURNING ${NOTE_SELECT}`,
     args: [name, content],
   })
   return c.json(result.rows[0], 201)
