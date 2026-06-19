@@ -26,7 +26,6 @@ export function CreateNoteDialog({ open, onClose, onCreated }: CreateNoteDialogP
   const [importedContent, setImportedContent] = useState('');
   const [importedFileName, setImportedFileName] = useState<string | null>(null);
   const [importError, setImportError] = useState('');
-
   const reset = () => {
     setNewNoteName('');
     setImportedContent('');
@@ -97,13 +96,8 @@ export function CreateNoteDialog({ open, onClose, onCreated }: CreateNoteDialogP
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose();
-      }}
-    >
-      <DialogContent className='max-w-sm'>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
+      <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
           <DialogTitle>New note</DialogTitle>
         </DialogHeader>
@@ -118,19 +112,21 @@ export function CreateNoteDialog({ open, onClose, onCreated }: CreateNoteDialogP
 
           <div
             {...getRootProps()}
-            className={`rounded-lg border border-dashed p-4 text-center transition-colors ${
+            className={`rounded-lg border border-dashed p-10 text-center transition-colors ${
               isDragActive ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
             }`}
           >
             <input {...getInputProps()} />
-            <div className='flex flex-col items-center gap-2'>
-              <Upload className='h-4 w-4 text-muted-foreground' />
-              <p className='text-sm font-medium'>
-                Drop a `.md` file here or choose one from your device
-              </p>
-              <p className='text-xs text-muted-foreground'>
-                The file content will be loaded into the new note before creating it.
-              </p>
+            <div className='flex flex-col items-center gap-3'>
+              <Upload className='h-6 w-6 text-muted-foreground' />
+              <div>
+                <p className='text-sm font-medium'>
+                  Drop a <code className='rounded bg-muted px-1 py-0.5 text-xs'>.md</code> file here or choose one from your device
+                </p>
+                <p className='mt-1 text-xs text-muted-foreground'>
+                  The file content will be loaded into the new note before creating it.
+                </p>
+              </div>
               <Button type='button' variant='secondary' size='sm' onClick={openFilePicker}>
                 Choose file
               </Button>
