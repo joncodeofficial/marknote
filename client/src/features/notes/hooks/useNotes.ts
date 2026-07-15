@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { notesService } from '@/features/notes/services/notesService'
 import type { Note } from '@/features/notes/types'
+import { getErrorMessage } from '@/shared/lib/errors'
 
 const NOTES_QUERY_KEY = ['notes']
 
@@ -22,7 +24,13 @@ export const useCreateNote = () => {
   return useMutation({
     mutationFn: ({ name, content }: { name: string; content: string }) =>
       notesService.create(name, content),
-    onSuccess: invalidateNotes(queryClient),
+    onSuccess: (note) => {
+      invalidateNotes(queryClient)()
+      toast.success(`Note "${note.name}" created`)
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Could not create the note'))
+    },
   })
 }
 
@@ -51,9 +59,13 @@ export const useUpdateNote = () => {
 
       return { listSnapshot, noteSnapshot }
     },
-    onError: (_error, { id }, context) => {
+    onSuccess: (_note, { name, content }) => {
+      toast.success(content !== undefined ? 'Note saved' : `Note renamed to "${name}"`)
+    },
+    onError: (error, { id }, context) => {
       if (context?.listSnapshot) queryClient.setQueryData(NOTES_QUERY_KEY, context.listSnapshot)
       if (context?.noteSnapshot) queryClient.setQueryData([...NOTES_QUERY_KEY, id], context.noteSnapshot)
+      toast.error(getErrorMessage(error, 'Could not save the changes'))
     },
     onSettled: invalidateNotes(queryClient),
   })
@@ -63,7 +75,13 @@ export const useDeleteNote = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => notesService.delete(id),
-    onSuccess: invalidateNotes(queryClient),
+    onSuccess: () => {
+      invalidateNotes(queryClient)()
+      toast.success('Note deleted')
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Could not delete the note'))
+    },
   })
 }
 
@@ -81,8 +99,9 @@ export const useReorderNotes = () => {
       })
       return { snapshot }
     },
-    onError: (_error, _ids, context) => {
+    onError: (error, _ids, context) => {
       if (context?.snapshot) queryClient.setQueryData(NOTES_QUERY_KEY, context.snapshot)
+      toast.error(getErrorMessage(error, 'Could not save the new order'))
     },
   })
 }

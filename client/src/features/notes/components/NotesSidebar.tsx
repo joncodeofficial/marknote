@@ -5,6 +5,7 @@ import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable } from '@dnd-kit/react/sortable';
 import { FilePlus, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 import { useGlobalStates } from '@/app/context/AppContext';
 import { APP_ROUTES } from '@/config';
 import type { Note } from '@/features/notes/types';
@@ -87,10 +88,11 @@ const NotesSidebar = () => {
   };
 
   const commitRename = (id: number) => {
-    if (renameValue.trim()) {
-      const note = notes.find((entry) => entry.id === id);
-      if (note) updateNote.mutate({ id, name: renameValue.trim() });
-      if (activeNote?.id === id) setActiveNote({ ...activeNote, name: renameValue.trim() });
+    const trimmedName = renameValue.trim();
+    const note = notes.find((entry) => entry.id === id);
+    if (trimmedName && note && trimmedName !== note.name) {
+      updateNote.mutate({ id, name: trimmedName });
+      if (activeNote?.id === id) setActiveNote({ ...activeNote, name: trimmedName });
     }
     setRenamingId(null);
   };
@@ -104,6 +106,7 @@ const NotesSidebar = () => {
   const handleLogout = () => {
     logout();
     navigate(APP_ROUTES.login, { replace: true });
+    toast.success('Session closed');
   };
 
   const handleSearch = useCallback((value: string) => setSearch(value), []);

@@ -1,4 +1,5 @@
-import { Check, GripVertical, Trash2, X } from 'lucide-react';
+import { useRef } from 'react';
+import { GripVertical, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSortable } from '@dnd-kit/react/sortable';
 import type { Note } from '@/features/notes/types';
@@ -79,6 +80,7 @@ export function NoteItem({
   onRenameChange,
 }: NoteItemProps) {
   const { ref, handleRef, isDragging } = useSortable({ id: note.id, index, disabled });
+  const skipBlurCommit = useRef(false);
 
   return (
     <div
@@ -116,26 +118,20 @@ export function NoteItem({
             onChange={(e) => onRenameChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') onCommitRename(note.id);
-              if (e.key === 'Escape') onCancelRename();
+              if (e.key === 'Escape') {
+                skipBlurCommit.current = true;
+                onCancelRename();
+              }
+            }}
+            onBlur={() => {
+              if (skipBlurCommit.current) {
+                skipBlurCommit.current = false;
+                return;
+              }
+              onCommitRename(note.id);
             }}
             className='h-6 bg-background px-1.5 py-0 text-xs'
           />
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-5 w-5 shrink-0 text-primary'
-            onClick={() => onCommitRename(note.id)}
-          >
-            <Check className='h-3 w-3' />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-5 w-5 shrink-0 text-muted-foreground'
-            onClick={onCancelRename}
-          >
-            <X className='h-3 w-3' />
-          </Button>
         </div>
       ) : (
         <>

@@ -87,12 +87,16 @@ export function CreateNoteDialog({ open, onClose, onCreated }: CreateNoteDialogP
 
   const handleCreate = async () => {
     if (!newNoteName.trim()) return;
-    const note = await createNote.mutateAsync({
-      name: newNoteName.trim(),
-      content: importedContent,
-    });
-    reset();
-    onCreated(note);
+    try {
+      const note = await createNote.mutateAsync({
+        name: newNoteName.trim(),
+        content: importedContent,
+      });
+      reset();
+      onCreated(note);
+    } catch {
+      // el toast de error ya lo muestra useCreateNote
+    }
   };
 
   return (

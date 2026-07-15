@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router'
+import { toast } from 'sonner'
 import { useGlobalStates } from '@/app/context/AppContext'
 import { APP_ROUTES } from '@/config'
 import { authService } from '@/features/auth/services/authService'
@@ -33,8 +34,10 @@ const LoginPage = () => {
       const token = await authService.login(password)
       login(token)
       navigate(APP_ROUTES.home, { replace: true })
+      toast.success('Welcome back')
     } catch {
       setError(true)
+      toast.error('Incorrect password')
     } finally {
       setLoading(false)
     }

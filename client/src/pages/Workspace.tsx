@@ -73,8 +73,12 @@ const WorkspacePage = () => {
 
     const content = await file.text()
     const name = file.name.replace(/\.md$/, '')
-    const note = await createNote({ name, content })
-    navigate(`/note/${note.id}`)
+    try {
+      const note = await createNote({ name, content })
+      navigate(`/note/${note.id}`)
+    } catch {
+      // el toast de error ya lo muestra useCreateNote
+    }
   }, [createNote, navigate])
 
   useEffect(() => {
